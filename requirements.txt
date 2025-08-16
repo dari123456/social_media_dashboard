@@ -1,0 +1,14 @@
+fastapi
+streamlit
+uvicorn[standard]
+python-dotenv
+requests
+openai
+gspread
+oauth2client
+google-cloud-storage
+pandas
+pytz
+tweepy
+beautifulsoup4
+lxml

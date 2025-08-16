@@ -1,0 +1,18 @@
+Dear Communication Manager,
+
+A new post has been automatically published to your Facebook Page.
+
+Article: {article_name}
+--------------------------------
+Post Content:
+"{post_caption}"
+--------------------------------
+
+You can view the live post here:
+{post_link}
+
+You can monitor the full workflow in the Google Sheet:
+{google_sheet_link}
+
+
+Thank you.

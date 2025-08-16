@@ -1,0 +1,12 @@
+You are a political communications strategist.
+
+Based on the following policy conclusion, write a brief and clear message strategy tailored for a political audience (such as Members of Parliament, policymakers, or public officials).
+
+The strategy should:
+- Emphasize clarity, not detail.
+- Be professional and persuasive, not emotional.
+- Highlight the key message without overexplaining.
+- Be suitable for shaping a short social media post or talking point.
+
+Here is the conclusion:
+[INSERT_CONCLUSION_HERE]

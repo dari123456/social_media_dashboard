@@ -1,0 +1,27 @@
+Subject: Action Required: Content Awaiting Approval for Article "{article_name}"
+
+Dear Communication Manager,
+
+To approve or reject this content, please go to the Google Sheet and update the approval columns for this row:
+{google_sheet_link}
+
+
+New social media content has been generated based on the article "{article_name}" and now requires your approval before it can be scheduled for posting.
+ARTICLE ID: {article_id}
+
+Please review the following item in the "Step 3" worksheet of the Google Sheet.
+
+--------------------------------
+Conclusion Focus:
+"{conclusion_text}"
+
+Generated Tweet:
+"{tweet_text}"
+
+AI-Matched Image:
+{matched_image_link}
+--------------------------------
+
+
+
+Thank you.

@@ -1,0 +1,30 @@
+Subject: Approval Needed for New Facebook Post: {article_name}
+
+Dear Communication Manager,
+
+Please approve or reject it in the sheet:
+{google_sheet_link}
+
+A new Facebook post has been generated and is ready for your review. Please check the details below and update the Google Sheet with "yes" or "no" in the 'Approved_by_human' column.
+
+--------------------------------------------------
+DETAILS
+--------------------------------------------------
+- ARTICLE ID: {article_id}
+- Article: {article_name}
+- Conclusion: {conclusion_text}
+
+- Matched Image: {matched_image_link}
+
+--- PROPOSED FACEBOOK POST ---
+
+[POST TEXT]
+{facebook_post_text}
+
+[HASHTAGS]
+{facebook_hashtags}
+
+--------------------------------------------------
+
+
+
