@@ -1,10 +1,18 @@
 # frontend/pages/1_🚀_Start_Workflow.py
 import streamlit as st
-import sys, os
 
-# --- enable imports from backend ---
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from backend.bots import orchestrator  # backend stays unchanged
+import sys, os
+from pathlib import Path
+
+# add the REPO ROOT (…/social_media_dashboard) to sys.path
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.append(str(REPO_ROOT))
+
+# now these imports will work
+# use the ones needed per page:
+from backend.bots import orchestrator, config, clients
+
 
 # --- Page Setup ---
 st.set_page_config(page_title="Start Workflow", page_icon="🚀", layout="wide")

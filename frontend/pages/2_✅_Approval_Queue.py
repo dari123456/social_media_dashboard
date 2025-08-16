@@ -2,10 +2,17 @@
 import streamlit as st
 import pandas as pd
 import sys, os
+from pathlib import Path
 
-# --- enable imports from backend ---
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from backend.bots import config, clients  # backend stays unchanged
+# add the REPO ROOT (…/social_media_dashboard) to sys.path
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.append(str(REPO_ROOT))
+
+# now these imports will work
+# use the ones needed per page:
+from backend.bots import orchestrator, config, clients
+
 
 PLATFORM_EMOJIS = {"facebook": "👍", "instagram": "📸", "twitter": "🐦"}
 
