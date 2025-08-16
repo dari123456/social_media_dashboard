@@ -9,10 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.append(str(REPO_ROOT))
 
-# now these imports will work
-# use the ones needed per page:
 from backend.bots import orchestrator, config, clients
-
 
 PLATFORM_EMOJIS = {"facebook": "👍", "instagram": "📸", "twitter": "🐦"}
 
@@ -72,13 +69,15 @@ st.title("✅ Approval Queue")
 st.markdown("Review the generated posts below. Approve them to send to scheduling, or Reject them to remove from the queue.")
 
 if 'posts' not in st.session_state:
-    st.session_state.posts = fetch_awaiting_approval_df()
+    # CHANGED: store list-of-dicts, not a DataFrame
+    st.session_state.posts = fetch_awaiting_approval_df().to_dict('records')
 
 if st.button("🔄 Refresh Queue"):
-    st.session_state.posts = fetch_awaiting_approval_df()
+    # CHANGED: same conversion on refresh
+    st.session_state.posts = fetch_awaiting_approval_df().to_dict('records')
     st.rerun()
 
-if st.session_state.posts is None or len(st.session_state.posts) == 0:
+if not st.session_state.posts:
     st.success("🎉 The approval queue is empty! All posts have been reviewed.")
 else:
     st.info(f"You have **{len(st.session_state.posts)}** posts awaiting your approval.")
@@ -109,12 +108,12 @@ else:
                     if st.button("👍 Approve", key=approve_key, use_container_width=True):
                         with st.spinner("Approving..."):
                             if update_approval_status(platform, post.get('post_id'), "yes"):
-                                st.session_state.posts = fetch_awaiting_approval_df()
+                                st.session_state.posts = fetch_awaiting_approval_df().to_dict('records')
                                 st.rerun()
                 with action_col2:
                     reject_key = f"reject-{i}-{post.get('post_id', '')}"
                     if st.button("👎 Reject", key=reject_key, use_container_width=True):
                         with st.spinner("Rejecting..."):
                             if update_approval_status(platform, post.get('post_id'), "no"):
-                                st.session_state.posts = fetch_awaiting_approval_df()
+                                st.session_state.posts = fetch_awaiting_approval_df().to_dict('records')
                                 st.rerun()
