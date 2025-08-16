@@ -13,9 +13,9 @@ st.header("How to Use This Dashboard")
 st.markdown("""
 Navigate through the pages in the sidebar to control the content automation workflow.
 
-1.  **🚀 Start Workflow**: Begin by entering an article URL to fetch its content, generate summaries, and create posts.
-2.  **✅ Approval Queue**: (Coming soon) Review all generated posts and approve them for scheduling.
-3.  **🗓️ Scheduling & Publishing**: (Coming soon) View the content calendar and manage the publishing schedule.
+1.  **🚀 Start Workflow**: Enter an article URL, approver emails, and platforms to generate posts.
+2.  **✅ Approval Queue**: Review all generated posts and approve/reject them.
+3.  **🗓️ Scheduling & Publishing**: Build the schedule and publish due posts.
 
 **Select a page from the sidebar on the left to begin.**
 """)
