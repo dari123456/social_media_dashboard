@@ -13,6 +13,16 @@ from backend.bots import orchestrator, config, clients
 
 PLATFORM_EMOJIS = {"facebook": "👍", "instagram": "📸", "twitter": "🐦"}
 
+# --- NEW: helpers ---
+def safe_get(d: dict, key: str, default: str = "") -> str:
+    v = d.get(key, None)
+    if v is None:
+        return default
+    if isinstance(v, float) and pd.isna(v):
+        return default
+    s = str(v).strip()
+    return s if s and s.lower() != "nan" else default
+
 # --- Helpers that read/write directly to Google Sheets ---
 def fetch_awaiting_approval_df() -> pd.DataFrame:
     gc = clients.get_gspread_client()
@@ -20,14 +30,22 @@ def fetch_awaiting_approval_df() -> pd.DataFrame:
     for platform_name, platform_cfg in config.PLATFORMS.items():
         try:
             ws = gc.open(platform_cfg.sheet_name).worksheet(platform_cfg.steps['step3'])
-            recs = ws.get_all_records()
+            recs = ws.get_all_records()  # list[dict]
             if not recs:
                 continue
             df = pd.DataFrame(recs)
+
+            # Normalize NaN -> None pentru ca UI-ul să nu afișeze 'nan'
+            if not df.empty:
+                df = df.where(pd.notnull(df), None)
+
+            # Filtru: Approved_by_human gol sau lipsă
             if 'Approved_by_human' in df.columns:
-                df = df[df['Approved_by_human'].astype(str).str.strip() == ""]
+                mask = (df['Approved_by_human'].isna()) | (df['Approved_by_human'].astype(str).str.strip() == "")
+                df = df[mask]
             else:
-                df = pd.DataFrame()
+                df = pd.DataFrame()  # dacă nu există coloana, nu avem ce aproba
+
             if not df.empty:
                 df['platform'] = platform_name
                 rows.extend(df.to_dict('records'))
@@ -69,11 +87,9 @@ st.title("✅ Approval Queue")
 st.markdown("Review the generated posts below. Approve them to send to scheduling, or Reject them to remove from the queue.")
 
 if 'posts' not in st.session_state:
-    # CHANGED: store list-of-dicts, not a DataFrame
     st.session_state.posts = fetch_awaiting_approval_df().to_dict('records')
 
 if st.button("🔄 Refresh Queue"):
-    # CHANGED: same conversion on refresh
     st.session_state.posts = fetch_awaiting_approval_df().to_dict('records')
     st.rerun()
 
@@ -84,36 +100,48 @@ else:
     for i, post in enumerate(st.session_state.posts):
         platform = post.get('platform', 'N/A')
         emoji = PLATFORM_EMOJIS.get(platform, "❓")
+
+        # --- pick platform-specific fields ---
+        if platform == "instagram":
+            text_val     = safe_get(post, "Instagram_Caption", "[No text generated]")
+            hashtags_val = safe_get(post, "Instagram_Hashtags", "")
+        elif platform == "facebook":
+            text_val     = safe_get(post, "Facebook_Post_Text", "[No text generated]")
+            hashtags_val = safe_get(post, "Facebook_Hashtags", "")
+        elif platform == "twitter":
+            text_val     = safe_get(post, "Tweet", "[No text generated]")
+            hashtags_val = ""  # adaugă dacă ai coloană pentru hashtags la Twitter
+        else:
+            text_val, hashtags_val = "[No text generated]", ""
+
         with st.container(border=True):
             col1, col2 = st.columns([1, 3])
             with col1:
-                image_url = post.get('Matched_Image_Path')
-                if image_url and str(image_url).startswith('http'):
+                image_url = safe_get(post, "Matched_Image_Path", "")
+                if image_url.startswith("http"):
                     st.image(image_url, use_container_width=True)
                 else:
                     st.text("No Image")
 
             with col2:
                 st.subheader(f"{emoji} {platform.capitalize()} Post")
-                text = post.get('Facebook_Post_Text') or post.get('Instagram_Caption') or post.get('Tweet', '[No text generated]')
-                hashtags = post.get('Facebook_Hashtags') or post.get('Instagram_Hashtags', '')
-                st.markdown(f"**Post Text:**\n\n{text}")
-                if hashtags:
-                    st.markdown(f"**Hashtags:**\n\n`{hashtags}`")
-                st.markdown(f"**Conclusion:** *{post.get('Conclusion', 'N/A')}*")
+                st.markdown(f"**Post Text:**\n\n{text_val}")
+                if hashtags_val:
+                    st.markdown(f"**Hashtags:**\n\n`{hashtags_val}`")
+                st.markdown(f"**Conclusion:** *{safe_get(post, 'Conclusion', 'N/A')}*")
 
                 action_col1, action_col2 = st.columns(2)
                 with action_col1:
-                    approve_key = f"approve-{i}-{post.get('post_id', '')}"
+                    approve_key = f"approve-{i}-{safe_get(post, 'post_id')}"
                     if st.button("👍 Approve", key=approve_key, use_container_width=True):
                         with st.spinner("Approving..."):
-                            if update_approval_status(platform, post.get('post_id'), "yes"):
+                            if update_approval_status(platform, safe_get(post, 'post_id'), "yes"):
                                 st.session_state.posts = fetch_awaiting_approval_df().to_dict('records')
                                 st.rerun()
                 with action_col2:
-                    reject_key = f"reject-{i}-{post.get('post_id', '')}"
+                    reject_key = f"reject-{i}-{safe_get(post, 'post_id')}"
                     if st.button("👎 Reject", key=reject_key, use_container_width=True):
                         with st.spinner("Rejecting..."):
-                            if update_approval_status(platform, post.get('post_id'), "no"):
+                            if update_approval_status(platform, safe_get(post, 'post_id'), "no"):
                                 st.session_state.posts = fetch_awaiting_approval_df().to_dict('records')
                                 st.rerun()
