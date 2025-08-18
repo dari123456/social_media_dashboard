@@ -102,3 +102,46 @@ def get_gcs_client():
         return storage.Client(credentials=creds, project=project)
     else:
         return storage.Client()
+    
+    # ----------------------------
+# Twitter (Tweepy)
+# ----------------------------
+def get_tweepy_clients():
+    """
+    Returns (api_v1, client_v2) using credentials from Streamlit secrets or env.
+    Requires:
+      TWITTER_API_KEY
+      TWITTER_API_SECRET
+      TWITTER_ACCESS_TOKEN
+      TWITTER_ACCESS_TOKEN_SECRET
+    """
+    import tweepy
+    # Read from secrets first, then env
+    def _get(name):
+        if _HAS_STREAMLIT and name in st.secrets:
+            return st.secrets[name]
+        v = os.getenv(name)
+        if v:
+            return v
+        raise RuntimeError(f"{name} not found in secrets or environment.")
+
+    api_key = _get("TWITTER_API_KEY")
+    api_secret = _get("TWITTER_API_SECRET")
+    access_token = _get("TWITTER_ACCESS_TOKEN")
+    access_secret = _get("TWITTER_ACCESS_TOKEN_SECRET")
+
+    # v1.1 (for media upload / classic posting)
+    auth = tweepy.OAuth1UserHandler(api_key, api_secret, access_token, access_secret)
+    api_v1 = tweepy.API(auth)
+
+    # v2 (some endpoints require Client)
+    client_v2 = tweepy.Client(
+        consumer_key=api_key,
+        consumer_secret=api_secret,
+        access_token=access_token,
+        access_token_secret=access_secret,
+        wait_on_rate_limit=True,
+    )
+
+    return api_v1, client_v2
+
