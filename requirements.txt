@@ -12,3 +12,5 @@ pytz
 tweepy
 beautifulsoup4
 lxml
+pillow
+pyzbar
